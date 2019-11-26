@@ -1,0 +1,93 @@
+PUZZLE:
+Have N (even) coins of various denominations all set in a row.
+Alice and Bob take turns removing a coin from either head or tail of row.
+(Alice starts)
+We want a strategy for Alice to have at the end at least as much money as Bob.
+
+Solution:
+Have e.g.
+10 1 3 5 1 7 (n = 6)
+Obs: Alice can decide to take either all the even-position coins or
+odd-positioned coins.
+Then it's easy: before starting, Alice just computes the sum for all odd and all
+even coins and chooses which of the sets has higher value.
+
+Bonus: dynamic programming solution
+The subproblem is computing the max difference in score between Alice and Bob
+over a subrow of coins over indices [i,j].
+Then DP(i,j) =
+if i > j    :   0
+if i == j   :   A[i]
+if i < j    :   max(A[i] - DP[i+1,j], A[j] - DP[i,j-1])
+
+
+
+===== GREEDY ALGORITHMS =====
+A general note: there is no crystal clear indicator that a problem has a greedy
+solution, you gotta sniff it like a truffle hound. When it does, usually it
+means sorting stuff and then picking in order (maybe under some contraint).
+Proofs of optimality usually involve a contradiction where you swap an item from
+your picked solution with one outside.
+
+
+PUZZLE:
+Have N pairs of coins: C_{i,1}, C_{i,2}.
+You can take coin C_{i,2} only if you've already taken C_{i,1}.
+You want the most money per K coins.
+
+GENERAL NOTE: if a problem has both a greedy and DP solution, in most cases
+greedy is faster.
+
+Dynamic Programming solution (O(N*K) time):
+Use knapsack. Which is an artillery piece.
+
+Greedy solution:
+We'll consider a new metric for the coins so we can sort them and pick in order:
+
+if C_i,1 >= C_i,2   :   spawn two items of value C_i,1 and C_i,2, weight 1.
+if C_i,1 < C_i,2    :   spawn one item of value (C_i,1 + C_i,2)/2, weight 2.
+
+Now sort these new items by value and accruing weights till K. This is optimal.
+(homework: prove it)
+Small issue: if the next item to take has weight 2 and your residual budget is
+1, you will need to find the left over *coin* of max value to pick.
+Cost: O(N*log(N))
+
+
+
+PROBLEM: ACTIVITY SELECTION
+You have a number of activities that start and end at fixed times.
+The activities may overlap.
+You want to be able to do as many activities as possible (just by count, the
+amount of time covered is irrelevant). Of course you're not ubiquitous.
+
+Dynamic Programming solution (O(N*log(N)):
+Use a scheduling solver. Again this is overkill.
+
+Greedy solution (also O(N*log(N)):
+Sort by end time (earliest first), pick first come first serve as long as
+compatible.
+Sketch of proof:
+Lemma: there is at least one optimal solution which includes segment F (the
+earliest to end). By contradiction, suppose all solutions do not contain F. Let
+G be the earliest ender of one such solution. G must end after F and overlap
+with it, otherwise you could include F in the solution. But you can indeed swap
+G for F in the solution without chaning its optimality.
+The rest of the proof follows easily by induction.
+
+
+
+PROBLEM: JOB SEQUENCING
+You have some jobs which all garner some profit and have a deadline.
+All jobs take the same time to be completed.
+You want to maximize profit.
+
+Greedy solution (O(N*log(N)):
+Sort by profit. Schedule items first come first serve at their deadline.
+Sketch of proof:
+Easy by induction on time: given T-1 max, you maximize T by choosing the best
+profit.
+Otherwise: when you pick your next item in the list, either you can insert it or
+all the timeslots where it could go are taken by jobs with higher profit.
+NB: you need a BST or queue or whatever for the free slots or your computational
+cost would go to O(N^2).
