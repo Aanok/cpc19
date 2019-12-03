@@ -1,0 +1,150 @@
+HEALTH PROBLEM
+Be adventurer, wanna kill n monsters.
+Start with H health.
+ONCE YOU'VE KILLED IT, each monster deals you d_i damange
+AND THEN heals you back r_i health.
+health. This may bring your health above H.
+
+In what order should you fight them to win (if possible)?
+
+SOLUTION
+Categorize monsters as
+GOOD: r_i >= d_i    (they leave you at least as good as you were)
+BAD: r_i < d_i      (they wear you down)
+
+Claim: there is an optimal ordering in which all GOOD monsters come before BADs.
+(optimal = keeps your health as high as possible at each tick)
+Assume by contradiction you had a winning ordering of the sort ...B...G...
+You can move B to the right of G: ...GB... (since you're already defeating all
+monsters inbetween with B's damage, all the more you can defeat them postponing
+the fight with B and even more so with G's healing).
+
+How do you sort within the GOOD partition? By increasing d_i.
+In fact, at the start you are at minimal health so you want to avoid the risk of
+getting so big a blow you go below zero (in fact, it's probably enough to just
+not start from the GOOD with highest d_i, but that's not optimal).
+
+How do you sort within the BAD partition? By decreasing r_i.
+This is by a form of symmetry.
+
+Double check: make a plot of health over GOOD and then BAD.
+GOOD draws bends like so:       BAD draws bends like so:
+        /                           \
+    \  /                             \  /
+     \/                               \/
+
+(ASCII art FTW)
+
+
+========== GRAPH ALGORITHMS ==========
+SNAKES AND LADDERS
+Tabletop game where there is a board with numbered tiles. You can move to any of
+the following N tiles from whereever you may be standing.
+Some tiles have ladders connecting them: those will make you jump ahead to the
+other end. Some tiles have snakes: those will kick you back to the other end.
+
+What is the shortest number of steps you must take to reach the end?
+
+SOLUTION
+Obviously, you just preprocess the graph defined by the board by shortcircuiting
+the teleport ahead and back of respectively ladders and snakes. Then it's just
+a BFS.
+
+
+
+A refresher: how Breadth-First Search works.
+NB: assume the whole graph is a connected component.
+BFS(G, s):
+    FOREACH u IN G.V / {s} DO
+        u.colour = white
+        u.distance = +Inf
+        u.parent = nil
+    END
+    s.colour = grey
+    s.distance = 0
+    s.parent = nil // or s itself
+    Q = new empty queue
+    Q.enqueue(s)
+    WHILE Q is not empty DO
+        u = Q.dequeue()
+        FOREACH v IN G.Adj[u] // neighbours
+        WHERE v.colour == white DO
+            v.colour = grey
+            v.d = u.d + 1
+            v.parent = u
+            Q.enqueue(v)
+        END
+        u.colour = black
+    END
+END
+
+The cost is O(#nodes + #edges).
+
+
+Another refresher: how Depth-First Search works.
+NB don't assume the whole graph is a connected component.
+DFS(G):
+    FOREACH u IN G.V DO
+        u.colour = white
+        u.parent = nil
+    END
+    time = 0
+    FOREACH u IN G.V
+    WHERE u.colour == white DO
+        DFS_VISIT(G, u)
+    END
+END
+
+DFS_VISIT(G, u):
+    time = time + 1
+    u.start = time
+    u.colour = grey
+    FOREACH v IN G.Adj[u] // neighbours
+    WHERE v.colour == white DO
+        v.parent = u
+        DFS_VISIT(G, v)
+    END
+    u.colour = black
+    time = time + 1
+    u.end = time
+END
+
+Of note: (u.end - u.start - 1) / 2 is the number of descendants of node u in the
+traversal tree.
+
+
+Parenthesis Theorem:
+For all (u,v) exactly one of the following holds:
+1. u.start < u.end < v.start < v.end (or vice-versa for (v,u));
+   This means u and v share maybe a common ancestor but no descendants in G.
+2. u.start < v.start < v.end < u.end (or vice-versa for (v,u));
+   This means v is a descendant of u in G.
+(bonus: u.start < v.start < u.end < v.end is impossible)
+
+
+White Path Theorem:
+Vertex v is a descendant of vertex u in the traversal tree if and only if there
+is a path from u to v consisting of only white nodes at time u.start.
+
+
+Definition(s):
+An edge in G and also in the traversal tree is called a **tree edge**.
+An edge in G but not in the traversal tree that connects a node to one of its
+ancestors in the tree is called a **back edge**.
+An edge in G but not in the traversal tree that connects a node to one of its
+descendants in the tree is called a **forwards edge**.
+An edge in G but not in the traversal forest that connects a node to another in
+a different tree is called a **cross edge**.
+
+Observation: you can use the node colours during the DFS or the start and end
+time after the fact to classify edges according to the above definitions.
+If you find a node pointing to a white node, it is a forwards edge.
+If you find a node pointing to a grey node, it is a back edge.
+If you find a node pointing to a black node, it is a cross edge.
+
+
+PROBLEM
+Have directed graph, want to check if there is a cycle or not. What do?
+
+PROBLEM
+Have directed graph, want to check if it is bipartite or note. What do?
