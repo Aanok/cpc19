@@ -1,0 +1,83 @@
+===== DISJOINT SETS & UNION-FIND =====
+
+We introduce the concept through a toy example:
+There are N people in a room. We say A and B are friends if they are directly
+friends or can be linked by a chain of friends (transitively).
+We are given a set of pairs describing direct friendships.
+we want to find the number of strongly connected components of friendship.
+
+e.g.
+N = 5
+(1,2) (5,4) (5,1)
+--> {1,2,4,5} and {3}
+Since the edges are undirected, you can solve this simply with a BFS.
+
+However, we may alternatively employ a disjoint-set data structure.
+This means structuring a collection of disjoint sets S1... Sn that support the
+following operations:
+- CreateSet(x) to spawn {x};
+- Union(x,y) to merge the sets that contain x and y;
+  (this will destroy the old sets and build a new one)
+- FindSet(x) returns one single element representative of the set containing x.
+  (we want this representative to be always the same until you invoke Union)
+
+With these tools, we can instantiate a set per each person in the room and keep
+a counter of the number of sets currently existing (starts from N, then). Then
+we go over the direct friendships (edges) and merge sets accordingly, decreasing
+the counter until we have the final answer.
+
+But how does it work?
+
+
+THE DISJOINT-SET DATA STRUCTURE
+Dumb solution: each set is a linked-list:
+We index the nodes 0 to N-1 and construct an according array of pointers that
+point to the relevant real node struct, or perhaps the representative for its
+containing linked-list.
+- CreateSet(x): spawn a new list; O(1)
+- Union(x,y): link the two lists and change the representative of one of the two
+  to that of the other; O(N)
+- FindSet(x): return node.representative. O(1)
+Problem: Union is horrible. Consider in your cost model to want to do unions
+till to have a huge set. The overall cost of this operation is obviously O(N^2).
+
+
+Fun fact: the overall cost goes down to O(M + N*log(N)) if you just apply the
+obvious heuristic of always changing the representative of the smaller of the
+two sets.
+(the proof of the argument uses reasoning similar to that of light/heavy tree
+decomposition)
+(M is the total number of Union ops you run)
+
+
+Smarter solution: forests of trees:
+- CreateSet(x): spawn singleton tree.
+- Union(x,y): attach the tree of y to the root of the tree of x.
+- FindSet(x): return the root of the tree.
+Of note: children point to their parent instead of the usual vice-versa.
+
+We need two heuristics:
+- Union by rank: always attach the smaller tree to the larger tree (but for some
+  reason or other you compute and cache the log of the size);
+- Path compression: every time you run FindSet you move all nodes you touch to
+  be direct children of the tree's root.
+Then the time complexity goes to O(M*inverse_ackermann(N) + N).
+
+
+====== MINIMUM SPANNING TREE ======
+As a notable application of Union-Find we discuss Kruskal's algorithm.
+
+We have a graph with undirected, weighted edges. We want the spanning tree with
+minimal overall weight.
+
+Kruskal's has cost O(#edges*log(#nodes)).
+Prin's (an improvement) has cost O(#edges + #nodes*log(#nodes)).
+
+Kruskal goes like this:
+- Sort edges by increasing weight. O(#edges) by radix sort
+- Start picking them in order and track connected components, merging them with
+  Union-Find until you have spanned everything.
+  (make sure you don't add edges that connect within the same connected
+  component or you'll get a cycle, i.e. only merge when FindSet returns distinct
+  values for the two extremities of the edge)
+  O(#edges*log(#nodes))log(#nodes))
