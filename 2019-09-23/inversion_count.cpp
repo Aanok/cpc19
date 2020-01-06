@@ -1,26 +1,37 @@
 // STRATEGY
-// Nut: consider merging low[0..L-1] and high[0..h-1]
-// When it happens that you pick from high,
-// high[j] < low[i] < low[i+1] ... < low[L-1]
+// Consider a merge step in the Merge Sort algorithm, sorting in ascending
+// order.
+// Specifically, consider merging LOW[0..l-1] and HIGH[0..h-1] where, of course,
+// LOW and HIGH are already sorted internally.
+// Assume you are confronting LOW[i] with HIGH[j].
+// If LOW[i] > HIGH[j], then HIGH[j] < LOW[i] < LOW[i+1] ... < LOW[l-1]
 // (NB strictly less than because all elements are distinct!)
-// Then you have L - i inversions.
+// Which means you have l - i inversions.
+// If LOW[i] < HIGH[j], we find no inversions.
+//
+// COST
+// Counting the inversions adds O(N) operations to each merge step of a Merge
+// Sort procedure. Thus, the cost is the same as a regular Merge Sort:
+// O(N*log(N)).
+// No additional memory overhead is required either outside of O(1) for
+// bookkeeping.
 
 
 #include <iostream>
 #include <vector>
 
 
-typedef unsigned int num_type;
+typedef uint64_t num_type;
 typedef unsigned int index_type;
 
 
-index_type inversion_merge(std::vector<num_type> &array,
+num_type inversion_merge(std::vector<num_type> &array,
         const index_type left,
         const index_type pivot,
         const index_type right)
 {
     std::vector<num_type> support;
-    index_type count = 0;
+    num_type count = 0;
     index_type i = left;
     index_type j = pivot + 1;
 
@@ -28,7 +39,7 @@ index_type inversion_merge(std::vector<num_type> &array,
 
     // do work while both indices still make sense
     while (i <= pivot && j <= right) {
-        if (array[i] < array[j]) {
+        if (array[i] <= array[j]) {
             support.push_back(array[i++]);
         } else {
             support.push_back(array[j++]);
@@ -50,11 +61,11 @@ index_type inversion_merge(std::vector<num_type> &array,
 }
 
 
-index_type inversion_count(std::vector<num_type> &array,
+num_type inversion_count(std::vector<num_type> &array,
         const index_type left,
         const index_type right)
 {
-    index_type count = 0;
+    num_type count = 0;
 
     if (left < right) {
         index_type pivot = (right + left) / 2;
@@ -76,6 +87,7 @@ int main(int argc, char *argv[])
     std::cin >> t;
     for (size_t i = 0; i < t; i++) {
         std::cin >> n;
+        if (n == 0) continue;
         array.clear();
         array.reserve(n);
         for (index_type j = 0; j < n; j++) {
