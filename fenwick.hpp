@@ -26,7 +26,6 @@ class fenwick
   
   void add(const typename std::vector<T>::size_type i, const T k)
   {
-    assert(i >= 0);
     typename std::vector<T>::size_type cur = i + 1;
     do {
       m_a[cur] += k;
@@ -35,7 +34,6 @@ class fenwick
   
   int prefix_sum(const typename std::vector<T>::size_type i) const
   {
-    assert(i >= 0);
     typename std::vector<T>::size_type cur = i + 1;
     T sum = 0;
     do {
