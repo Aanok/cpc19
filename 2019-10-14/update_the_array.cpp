@@ -1,6 +1,7 @@
 // STRATEGY
 // We solve with the same trick of littlegirl.cpp:
-// for each update operation <l,r,v> on array A we execute A[l]++ and A[r+1]--.
+// for each update operation <l,r,v> on array A we execute A[l] += v and
+// A[r+1] += v.
 // Instead of doing this on a "dumb" array and then making a final scan to
 // manually compute the prefix sum of A, we immediately instantiate A as a BIT.
 //
@@ -20,19 +21,19 @@ class fenwick
   private:
   std::vector<T> m_a;
   
-  inline size_t parent(const size_t i) const
+  static inline size_t parent(const size_t i)
   {
     return i - (i & -i);
   }
   
-  inline size_t get_next(const size_t i) const
+  static inline size_t get_next(const size_t i)
   {
     return i + (i & -i);
   }
   
   public:
   fenwick(const size_t n)
-    : m_a(n + 1)
+    : m_a(n + 2)
   {
     assert(n > 0);
   }
@@ -45,7 +46,7 @@ class fenwick
     } while ((cur = get_next(cur)) < m_a.size());
   }
   
-  int prefix_sum(const typename std::vector<T>::size_type i) const
+  T prefix_sum(const typename std::vector<T>::size_type i) const
   {
     typename std::vector<T>::size_type cur = i + 1;
     T sum = 0;
